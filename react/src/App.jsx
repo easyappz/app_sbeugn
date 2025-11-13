@@ -6,7 +6,7 @@ import './App.css';
 import { Home } from './components/Home';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
-import Profile from './components/Profile';
+import Profile from './components/Profile/Profile.jsx';
 import AdDetail from './components/Ads/AdDetail';
 import AdForm from './components/Ads/AdForm';
 import MyAds from './components/Ads/MyAds';
@@ -56,7 +56,7 @@ function App() {
                 </>
               ) : (
                 <>
-                  <NavLink to="/login" style={{ textDecoration: 'none' }}>Вход</NavLink>
+                  <NavLink to="/login" style={{ textDecoration: 'none' }}>Войти</NavLink>
                   <NavLink to="/register" style={{ textDecoration: 'none' }}>Регистрация</NavLink>
                 </>
               )}
