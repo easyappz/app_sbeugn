@@ -94,7 +94,7 @@ class AdSerializer(serializers.ModelSerializer):
 
     # Read helpers
     category_name = serializers.SerializerMethodField(read_only=True)
-    category_slug_read = serializers.SerializerMethodField(read_only=True, source="category.slug")
+    category_slug_read = serializers.SerializerMethodField()
 
     class Meta:
         model = Ad
