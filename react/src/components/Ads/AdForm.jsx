@@ -67,10 +67,23 @@ export default function AdForm({ mode = 'create' }) {
         result = await createAd(payload);
       }
       const adId = result?.id || id;
-      navigate(`/ads/${adId}`);
+      if (isEdit) {
+        navigate('/my-ads');
+      } else {
+        navigate(`/ads/${adId}`);
+      }
     } catch (err) {
-      const msg = err?.response?.data?.detail || 'Ошибка сохранения объявления';
-      setError(typeof msg === 'string' ? msg : 'Ошибка сохранения объявления');
+      const data = err?.response?.data;
+      let msg = 'Ошибка сохранения объявления';
+      if (typeof data === 'string') msg = data;
+      else if (data?.detail) msg = data.detail;
+      else if (data) {
+        try {
+          const keys = Object.keys(data);
+          if (keys.length) msg = `${keys[0]}: ${Array.isArray(data[keys[0]]) ? data[keys[0]].join(', ') : String(data[keys[0]])}`;
+        } catch (_) {}
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }
