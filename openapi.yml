@@ -144,6 +144,197 @@ paths:
                 $ref: '#/components/schemas/MemberPrivate'
         '401':
           description: Требуется аутентификация
+  /api/ads/:
+    get:
+      operationId: ads_list
+      tags:
+        - ads
+      summary: Список объявлений с фильтрами
+      description: Возвращает список объявлений. Поддерживает фильтры по категории (slug или id), цене, дате и поиску, а также сортировку.
+      parameters:
+        - in: query
+          name: category
+          description: Category slug or id
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: min_price
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: max_price
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: date_from
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: date_to
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: search
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: ordering
+          description: created_at (default desc) or price
+          required: false
+          schema:
+            type: string
+            enum: [price, -price, created_at, -created_at]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ad'
+    post:
+      operationId: ads_create
+      tags:
+        - ads
+      summary: Создание объявления
+      description: Создает объявление. Требуется аутентификация. Указывать либо category_id, либо category_slug.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdInput'
+      responses:
+        '201':
+          description: Создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ad'
+        '400':
+          description: Ошибка валидации
+        '401':
+          description: Требуется аутентификация
+  /api/ads/{id}/:
+    get:
+      operationId: ad_retrieve
+      tags:
+        - ads
+      summary: Получение объявления
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ad'
+        '404':
+          description: Не найдено
+    put:
+      operationId: ad_update
+      tags:
+        - ads
+      summary: Обновление объявления (только автор)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdInput'
+      responses:
+        '200':
+          description: Обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ad'
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Нет прав
+        '404':
+          description: Не найдено
+    delete:
+      operationId: ad_delete
+      tags:
+        - ads
+      summary: Удаление объявления (только автор)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Удалено
+        '401':
+          description: Требуется аутентификация
+        '403':
+          description: Нет прав
+        '404':
+          description: Не найдено
+  /api/categories/:
+    get:
+      operationId: categories_list
+      tags:
+        - ads
+      summary: Список категорий
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+  /api/my/ads/:
+    get:
+      operationId: my_ads_list
+      tags:
+        - ads
+      summary: Объявления текущего пользователя
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ad'
+        '401':
+          description: Требуется аутентификация
 components:
   schemas:
     Message:
@@ -258,6 +449,94 @@ components:
           type: string
         about:
           type: string
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+      required:
+        - id
+        - slug
+        - name
+    Ad:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        category:
+          type: integer
+          description: Category id
+        category_name:
+          type: string
+          readOnly: true
+        category_slug_read:
+          type: string
+          readOnly: true
+        contact_info:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        author:
+          $ref: '#/components/schemas/MemberPublic'
+      required:
+        - id
+        - title
+        - description
+        - price
+        - category
+        - contact_info
+        - created_at
+        - updated_at
+        - is_active
+        - author
+    AdInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        category_id:
+          type: integer
+          description: Category id (либо укажите category_slug)
+        category_slug:
+          type: string
+          description: Category slug (либо укажите category_id)
+        contact_info:
+          type: string
+        is_active:
+          type: boolean
+      required:
+        - title
+        - description
+        - price
+        - contact_info
   securitySchemes:
     bearerAuth:
       type: http

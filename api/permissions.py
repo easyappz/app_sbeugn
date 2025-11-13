@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsAuthorOrReadOnly(BasePermission):
-    message = "You do not have permission to modify this object."
+    message = "У вас нет прав для изменения этого объекта."
 
     def has_object_permission(self, request, view, obj) -> bool:
         if request.method in SAFE_METHODS:
